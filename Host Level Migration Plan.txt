@@ -1,0 +1,7 @@
+# Host Level Migration Plan
+
+
+1. List all vms on the host, capture locations of virtual machines and templates -> .xml
+2. Disconnect the host from the old vcenter
+3. Connect the host to the new vcenter
+4. Read .xml, locate the vms and move them into their folder
