@@ -111,26 +111,32 @@ param(
     }
 }
 
+$directory = ""
+$hostName = ""
+
 $outVMs = @()
-$allVMs = Get-VMHost -Name 10.80.168.105 | Get-VM
+$allVMs = Get-VMHost -Name $hostName | Get-VM
+$allTemplates = Get-VMHost -Name $hostName | Get-Template
 
 foreach ($thisVM in $allVMs) {
 
-    $myVM = "" | select name,folderPath
+    $myVM = "" | select name,folderPath,isTemplate
     $myVM.name = $thisVM.name
     $myVM.folderPath = $thisVM | Get-VMFolderPath
+    $myVM.isTemplate = $false
 
     $outVMs += $myVM
 }
 
-$outVMs | export-clixml $directory\VMs.xml
+foreach ($thisTemplate in $allTemplates) {
 
+    $myTemplate = "" | Select name,folderPath,isTemplate
+    $myTemplate.name = $thisTemplate.name
+    $myTemplate.folderPath = $thisTemplate | Get-VMFolderPath
+    $myTemplate.isTemplate = $true
 
-
-foreach ($thisVM in $allVMs) {
-
-    $myVM = "" | select name,folderPath
-    $myVM.name = $thisVM.name
-    $thisVM | Get-VMFolderPath
+    $outVMs += $myTemplate
 }
+
+$outVMs | export-clixml $directory\${hostName}_folders.xml
 

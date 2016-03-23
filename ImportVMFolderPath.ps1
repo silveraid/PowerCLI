@@ -8,7 +8,7 @@ function Get-FolderByPath{
   [CmdletBinding()]
   [parameter(Mandatory = $true)]
   [System.String[]]${Path},
-  [char]${Separator} = '/'
+  [char]${Separator} = '\'
   )
  
   process{
@@ -32,6 +32,36 @@ function Get-FolderByPath{
           Get-Folder -Name $_.Name -Location $root.Parent -NoRecursion -Server $vc
         }
       }
+    }
+  }
+}
+
+$directory = ""
+$hostName = ""
+
+$allVMs = import-clixml $directory\${hostName}_folders.xml
+
+foreach ($thisVM in $allVMs) {
+
+  if ($thisVM.isTemplate) {
+
+    $template = Get-Folder -Name NEW | Get-Template -Name $thisVM.name
+    $folder = Get-FolderByPath -Path $thisVM.folderPath
+
+    if ($template -and $folder) {
+
+      Move-Template -Template $template -Destination $folder
+    }
+  }
+
+  else {
+
+    $vm = Get-Folder -Name NEW | Get-VM -Name $thisVM.name
+    $folder = Get-FolderByPath -Path $thisVM.folderPath
+
+    if ($vm -and $folder) {
+
+      Move-VM -VM $vm -Destination $folder
     }
   }
 }
