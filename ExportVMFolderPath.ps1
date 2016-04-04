@@ -120,9 +120,13 @@ $allTemplates = Get-VMHost -Name $hostName | Get-Template
 
 foreach ($thisVM in $allVMs) {
 
-    $myVM = "" | select name,folderPath,isTemplate
+    $myVMView = $thisVM | Get-View
+
+    $myVM = "" | select name,notes,folderPath,vmxPath,isTemplate
     $myVM.name = $thisVM.name
+    $myVM.notes = $thisVM.Notes
     $myVM.folderPath = $thisVM | Get-VMFolderPath
+    $myVM.vmxPath = $myVMView.Config.Files.VmPathName
     $myVM.isTemplate = $false
 
     $outVMs += $myVM
@@ -130,13 +134,17 @@ foreach ($thisVM in $allVMs) {
 
 foreach ($thisTemplate in $allTemplates) {
 
-    $myTemplate = "" | Select name,folderPath,isTemplate
+    $myTemplateView = $thisTemplate | Get-View
+
+    $myTemplate = "" | Select name,notes,folderPath,vmxPath,isTemplate
     $myTemplate.name = $thisTemplate.name
+    $myTemplate.notes = $thisVM.Notes
     $myTemplate.folderPath = $thisTemplate | Get-VMFolderPath
+    $myTemplate.vmxPath = $myTemplateView.Config.Files.VmPathName
     $myTemplate.isTemplate = $true
 
     $outVMs += $myTemplate
 }
 
-$outVMs | export-clixml $directory\${hostName}_folders.xml
+$outVMs | export-clixml "${directory}\${hostName}_folders.xml"
 

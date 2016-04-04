@@ -38,6 +38,7 @@ function Get-FolderByPath{
 
 $directory = ""
 $hostName = ""
+$dcName = ""
 
 $allVMs = import-clixml $directory\${hostName}_folders.xml
 
@@ -45,6 +46,9 @@ foreach ($thisVM in $allVMs) {
 
   if ($thisVM.isTemplate) {
 
+    $ESXhost = Get-VMHost -Name $hostName
+    $VMFolder = Get-Datacenter -Name $dcName | Get-Folder -Name vm -NoRecursion | Get-Folder -Name NEW -NoRecursion
+    New-Template -TemplateFilePath $thisVM.vmxPath -VMHost $ESXHost -Location $VMFolder
     $template = Get-Folder -Name NEW | Get-Template -Name $thisVM.name
     $folder = Get-FolderByPath -Path $thisVM.folderPath
 
