@@ -36,37 +36,43 @@ function Get-FolderByPath{
   }
 }
 
-$directory = ""
-$hostName = ""
-$dcName = ""
+function RestoreESXInfo {
 
-$allVMs = import-clixml $directory\${hostName}_folders.xml
+  param([string]$directory, [string]$hostName, [string]$dcName)
 
-foreach ($thisVM in $allVMs) {
+    if ($directory -eq "" -or $hostName -eq "" -or $dcName -eq "") {
 
-  if ($thisVM.isTemplate) {
-
-    $ESXhost = Get-VMHost -Name $hostName
-    $VMFolder = Get-Datacenter -Name $dcName | Get-Folder -Name vm -NoRecursion | Get-Folder -Name NEW -NoRecursion
-    New-Template -TemplateFilePath $thisVM.vmxPath -VMHost $ESXHost -Location $VMFolder
-    $template = Get-Folder -Name NEW | Get-Template -Name $thisVM.name
-    $folder = Get-FolderByPath -Path $thisVM.folderPath
-
-    if ($template -and $folder) {
-
-      Move-Template -Template $template -Destination $folder
+        echo "Please specify directory, dcName, and hostName!"
+        return;
     }
-  }
 
-  else {
+  $allVMs = import-clixml $directory\${hostName}_folders.xml
 
-    $vm = Get-Folder -Name NEW | Get-VM -Name $thisVM.name
-    $folder = Get-FolderByPath -Path $thisVM.folderPath
+  foreach ($thisVM in $allVMs) {
 
-    if ($vm -and $folder) {
+    if ($thisVM.isTemplate) {
 
-      Move-VM -VM $vm -Destination $folder
+      $ESXhost = Get-VMHost -Name $hostName
+      $VMFolder = Get-Datacenter -Name $dcName | Get-Folder -Name vm -NoRecursion | Get-Folder -Name NEW -NoRecursion
+      New-Template -TemplateFilePath $thisVM.vmxPath -VMHost $ESXHost -Location $VMFolder
+      $template = Get-Folder -Name NEW | Get-Template -Name $thisVM.name
+      $folder = Get-FolderByPath -Path $thisVM.folderPath
+
+      if ($template -and $folder) {
+
+        Move-Template -Template $template -Destination $folder
+      }
+    }
+
+    else {
+
+      $vm = Get-Folder -Name NEW | Get-VM -Name $thisVM.name
+      $folder = Get-FolderByPath -Path $thisVM.folderPath
+
+      if ($vm -and $folder) {
+
+        Move-VM -VM $vm -Destination $folder
+      }
     }
   }
 }
-

@@ -111,40 +111,58 @@ param(
     }
 }
 
-$directory = ""
-$hostName = ""
+function SaveESXInfo {
 
-$outVMs = @()
-$allVMs = Get-VMHost -Name $hostName | Get-VM
-$allTemplates = Get-VMHost -Name $hostName | Get-Template
+    param([string]$directory,[string]$hostName)
 
-foreach ($thisVM in $allVMs) {
+    if ($directory -eq "" -or $hostName -eq "") {
 
-    $myVMView = $thisVM | Get-View
+        echo "Please specify directory and hostName!"
+        return;
+    }
 
-    $myVM = "" | select name,notes,folderPath,vmxPath,isTemplate
-    $myVM.name = $thisVM.name
-    $myVM.notes = $thisVM.Notes
-    $myVM.folderPath = $thisVM | Get-VMFolderPath
-    $myVM.vmxPath = $myVMView.Config.Files.VmPathName
-    $myVM.isTemplate = $false
+    $outVMs = @()
+    $allVMs = Get-VMHost -Name $hostName | Get-VM
+    $allTemplates = Get-VMHost -Name $hostName | Get-Template
 
-    $outVMs += $myVM
+    foreach ($thisVM in $allVMs) {
+
+        $myVMView = $thisVM | Get-View
+
+        $myVM = "" | select name,notes,folderPath,vmxPath,isTemplate,rPool
+        $myVM.name = $thisVM.name
+        $myVM.notes = $thisVM.Notes
+        $myVM.folderPath = $thisVM | Get-VMFolderPath
+        $myVM.vmxPath = $myVMView.Config.Files.VmPathName
+        $myVM.isTemplate = $false
+
+        $rpool = Get-ResourcePool -VM $thisVM | Select Name,@{N="Parent";E={
+                    $path = $_.Parent.Name,$_.Name -join '/'
+                    $parent = $_.Parent
+                    while($parent -isnot [VMware.VimAutomation.ViCore.Impl.V1.Inventory.ClusterIMpl]){
+                        $path = $parent.Parent.Name,$path -join '/'
+                        $parent = $parent.Parent
+                    }
+                $path}}
+
+        $myVM.rPool = $rpool.Parent
+
+        $outVMs += $myVM
+    }
+
+    foreach ($thisTemplate in $allTemplates) {
+
+        $myTemplateView = $thisTemplate | Get-View
+
+        $myTemplate = "" | Select name,notes,folderPath,vmxPath,isTemplate
+        $myTemplate.name = $thisTemplate.name
+        $myTemplate.notes = $thisVM.Notes
+        $myTemplate.folderPath = $thisTemplate | Get-VMFolderPath
+        $myTemplate.vmxPath = $myTemplateView.Config.Files.VmPathName
+        $myTemplate.isTemplate = $true
+
+        $outVMs += $myTemplate
+    }
+
+    $outVMs | export-clixml "${directory}\${hostName}_folders.xml"
 }
-
-foreach ($thisTemplate in $allTemplates) {
-
-    $myTemplateView = $thisTemplate | Get-View
-
-    $myTemplate = "" | Select name,notes,folderPath,vmxPath,isTemplate
-    $myTemplate.name = $thisTemplate.name
-    $myTemplate.notes = $thisVM.Notes
-    $myTemplate.folderPath = $thisTemplate | Get-VMFolderPath
-    $myTemplate.vmxPath = $myTemplateView.Config.Files.VmPathName
-    $myTemplate.isTemplate = $true
-
-    $outVMs += $myTemplate
-}
-
-$outVMs | export-clixml "${directory}\${hostName}_folders.xml"
-
