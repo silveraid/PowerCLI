@@ -34,7 +34,7 @@ $report = get-datacenter $datacenter -Server $sourceVI| Get-folder vm | get-fold
         foreach ($line in $report) {
         $line.Path = ($line.Path).Replace($datacenter + "\","vm\")
         }
-$report | Export-Csv "$(directory)\03-$($datacenter)-Folders-with-FolderPath.csv" -NoTypeInformation
+$report | Export-Csv "$($directory)\03-$($datacenter)-Folders-with-FolderPath.csv" -NoTypeInformation
 
 $report = @()
 $report = get-datacenter $datacenter -Server $sourceVI| Get-folder datastore | get-folder | Get-Folderpath
@@ -42,7 +42,7 @@ $report = get-datacenter $datacenter -Server $sourceVI| Get-folder datastore | g
         foreach ($line in $report) {
         $line.Path = ($line.Path).Replace($datacenter + "\","vm\")
         }
-$report | Export-Csv "$(directory)\03-$($datacenter)-Datastore-Folders-with-FolderPath.csv" -NoTypeInformation
+$report | Export-Csv "$($directory)\03-$($datacenter)-Datastore-Folders-with-FolderPath.csv" -NoTypeInformation
 
 $report = @()
 $report = get-datacenter $datacenter -Server $sourceVI| Get-folder network | get-folder | Get-Folderpath
@@ -50,7 +50,7 @@ $report = get-datacenter $datacenter -Server $sourceVI| Get-folder network | get
         foreach ($line in $report) {
         $line.Path = ($line.Path).Replace($datacenter + "\","vm\")
         }
-$report | Export-Csv "$(directory)\03-$($datacenter)-Network-Folders-with-FolderPath.csv" -NoTypeInformation
+$report | Export-Csv "$($directory)\03-$($datacenter)-Network-Folders-with-FolderPath.csv" -NoTypeInformation
 
 
 Disconnect-VIServer "*" -Confirm:$False

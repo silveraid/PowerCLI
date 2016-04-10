@@ -13,7 +13,7 @@ connect-viserver -server $destVI -Credential $creds
 
 ##IMPORT FOLDERS
 Import-Csv "$($directory)\03-$($datacenter)-Folders-with-FolderPath.csv" | % {
- $startFolder = Get-Datacenter -Name 'Bartor' | Get-Folder -Name 'vm' -NoRecursion
+ $startFolder = Get-Datacenter -Name $datacenter | Get-Folder -Name 'vm' -NoRecursion
     $path = $_.Path
  
     $location = $startFolder
@@ -22,7 +22,7 @@ Import-Csv "$($directory)\03-$($datacenter)-Folders-with-FolderPath.csv" | % {
         $folder=$_
         Try {
             echo "GET: $folder LOC: $location"
-            $location = Get-Folder -Name $folder -Location $location -ErrorAction Stop
+            $location = Get-Folder -Name $folder -Location $location -NoRecursion -ErrorAction Stop
         }
         Catch{
             echo "NEW: $folder LOC: $location"
@@ -33,7 +33,7 @@ Import-Csv "$($directory)\03-$($datacenter)-Folders-with-FolderPath.csv" | % {
 }
 
 Import-Csv "$($directory)\03-$($datacenter)-Network-Folders-with-FolderPath.csv" | % {
- $startFolder = Get-Datacenter -Name 'Bartor' | Get-Folder -Type Network -Name datastore -NoRecursion
+ $startFolder = Get-Datacenter -Name $datacenter | Get-Folder -Type Network -Name datastore -NoRecursion
     $path = $_.Path
  
     $location = $startFolder
@@ -42,7 +42,7 @@ Import-Csv "$($directory)\03-$($datacenter)-Network-Folders-with-FolderPath.csv"
         $folder=$_
         Try {
             echo "GET: $folder LOC: $location"
-            $location = Get-Folder -Name $folder -Location $location -ErrorAction Stop
+            $location = Get-Folder -Name $folder -Location $location -NoRecursion -ErrorAction Stop
         }
         Catch{
             echo "NEW: $folder LOC: $location"
@@ -53,7 +53,7 @@ Import-Csv "$($directory)\03-$($datacenter)-Network-Folders-with-FolderPath.csv"
 }
 
 Import-Csv "$($directory)\03-$($datacenter)-Datastore-Folders-with-FolderPath.csv" | % {
-    $startFolder = Get-Datacenter -Name 'Bartor' | Get-Folder -Type Datastore -Name datastore -NoRecursion
+    $startFolder = Get-Datacenter -Name $datacenter | Get-Folder -Type Datastore -Name datastore -NoRecursion
     $path = $_.Path
  
     $location = $startFolder
@@ -62,7 +62,7 @@ Import-Csv "$($directory)\03-$($datacenter)-Datastore-Folders-with-FolderPath.cs
         $folder=$_
         Try {
             echo "GET: $folder LOC: $location"
-            $location = Get-Folder -Name $folder -Location $location -ErrorAction Stop
+            $location = Get-Folder -Name $folder -Location $location -NoRecursion -ErrorAction Stop
         }
         Catch {
             echo "NEW: $folder LOC: $location"
