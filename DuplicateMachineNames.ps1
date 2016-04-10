@@ -1,0 +1,1 @@
+Get-View -ViewType VirtualMachine -Property Name | Group-Object Name | Where-Object {$_.count -gt 1}
