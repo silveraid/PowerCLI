@@ -53,9 +53,9 @@ function RestoreESXInfo {
     if ($thisVM.isTemplate) {
 
       $ESXhost = Get-VMHost -Name $hostName
-      $VMFolder = Get-Datacenter -Name $dcName | Get-Folder -Name vm -NoRecursion | Get-Folder -Name NEW -NoRecursion
+      $VMFolder = Get-Folder -Name "Discovered virtual machine"
       New-Template -TemplateFilePath $thisVM.vmxPath -VMHost $ESXHost -Location $VMFolder
-      $template = Get-Folder -Name NEW | Get-Template -Name $thisVM.name
+      $template = Get-Template -Name $thisVM.name -Location $VMFolder
       $folder = Get-FolderByPath -Path $thisVM.folderPath
 
       if ($template -and $folder) {
@@ -66,12 +66,21 @@ function RestoreESXInfo {
 
     else {
 
-      $vm = Get-Folder -Name NEW | Get-VM -Name $thisVM.name
+      $vm = Get-Folder -Name "Discovered virtual machine" | Get-VM -Name $thisVM.name
       $folder = Get-FolderByPath -Path $thisVM.folderPath
+      $pool = $thisVM.rPool.Split("/")
 
       if ($vm -and $folder) {
 
         Move-VM -VM $vm -Destination $folder
+      }
+
+      $dest_cluster = Get-Cluster -Name $pool[0]
+      $dest_pool = Get-ResourcePool -Location $dest_cluster -Name $pool[2]
+
+      if ($vm -and $dest_pool) {
+
+        Move-VM -VM $vm -Destination $dest_pool
       }
     }
   }
